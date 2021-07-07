@@ -16,7 +16,7 @@
 -->
 <resources>
 
-    <string name="app_name">Creating and Monitoring Geofences</string>
+    <string name="app_name">OutsideApp</string>
 
     <!-- Buttons strings -->
     <string name="add_geofences">Add geofences</string>
@@ -39,8 +39,8 @@
     </string>
 
     <!-- Transition type strings -->
-    <string name="geofence_transition_entered">Entered</string>
-    <string name="geofence_transition_exited">Exited</string>
+    <string name="geofence_transition_entered">Returned</string>
+    <string name="geofence_transition_exited">Left</string>
     <string name="unknown_geofence_transition">Unknown Transition</string>
 
     <string name="geofence_transition_notification_text">
