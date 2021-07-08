@@ -16,6 +16,7 @@
 
 package com.google.android.gms.location.sample.geofencing;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,6 +30,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
@@ -56,6 +58,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
      */
     public static void enqueueWork(Context context, Intent intent) {
         enqueueWork(context, GeofenceTransitionsJobIntentService.class, JOB_ID, intent);
+        Log.i("IOTRACKINGBRUH", "WE IN ENQUEUE OF GEOFENCETRANSITIONSJOBINTENTSERVICE");
     }
 
     /**
@@ -72,7 +75,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             Log.e(TAG, errorMessage);
             return;
         }
-
+        Log.i("IOTRACKINGBRUH", "WE IN ONHANDLEWORK OF GEOFENCETRANSITIONSJOBINTENTSERVICE");
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
@@ -95,6 +98,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             Log.e(TAG, getString(R.string.geofence_transition_invalid_type, geofenceTransition));
         }
     }
+
 
     /**
      * Gets transition details and returns them as a formatted string.
@@ -180,6 +184,35 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         // Issue the notification
         mNotificationManager.notify(0, builder.build());
     }
+    public void startalarms(Boolean why){
+        //Toast.makeText(this, "Reminder set!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, ReminderBroadcast.class);
+        intent.putExtra("coins", 5);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if(why) {
+            long timeatbuttonclick = System.currentTimeMillis();
+
+            long tensecondsinmilis = 1000 * 10;
+
+
+            ArrayList<Integer> all_millis = new ArrayList<>();
+            for (int x = 1; x <= 4; x++) {
+                all_millis.add(1000 * (10 * x));
+            }
+
+
+            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, timeatbuttonclick + tensecondsinmilis, tensecondsinmilis, pendingIntent);
+        }
+        else{
+            if(alarmManager != null && pendingIntent != null) {
+                alarmManager.cancel(pendingIntent);
+            }
+        }
+
+
+    }
 
     /**
      * Maps geofence transition types to their human-readable equivalents.
@@ -190,8 +223,10 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     private String getTransitionString(int transitionType) {
         switch (transitionType) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
+                startalarms(false);
                 return getString(R.string.geofence_transition_entered);
             case Geofence.GEOFENCE_TRANSITION_EXIT:
+                startalarms(true);
                 return getString(R.string.geofence_transition_exited);
             default:
                 return getString(R.string.unknown_geofence_transition);
