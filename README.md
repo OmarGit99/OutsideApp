@@ -5,4 +5,4 @@ App that's a utility tool for when venturing in the outdoors
 <br>
 <li> Sends notification every 2 hours using AlarmManager and NotificationCompat for user to reapply sun protection</li>
 <br>
-<li> Informs user of UV index using OpenUV API </li>
+<li> Informs user of UV index and other useful details using OpenUV API </li>
