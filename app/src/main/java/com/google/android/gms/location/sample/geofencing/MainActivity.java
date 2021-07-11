@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -30,6 +31,8 @@ import androidx.annotation.NonNull;
 
 
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
@@ -45,6 +48,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     private static final String TAG = "MainActivity";
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+    TextView uvtextview;
 
     /**
      * Tracks whether the user requested to add or remove geofences, or to do neither.
@@ -100,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     public class Uvdownloader extends AsyncTask<String, Void, String>{
 
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         protected String doInBackground(String... strings) {
             String api_key = strings[0];
@@ -119,7 +128,9 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                 response = client.newCall(request).execute();
 
                 returner = response.body().string();
-                
+
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         // Get the geofences used. Geofence data is hard coded in this sample.
         populateGeofenceList();
-        TextView uvtextview = findViewById(R.id.uv_info);
+        uvtextview = findViewById(R.id.uv_info);
 
 
         //execute the asynctask
@@ -154,10 +165,34 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         Uvdownloader uvdownloader = new Uvdownloader();
 
         try {
-            Log.i("UVTESTING",uvdownloader.execute("b69e41dad3e43f6936a08735c4642427").get());
+            String output = uvdownloader.execute("b69e41dad3e43f6936a08735c4642427").get();
+            JSONObject jsonObject= new JSONObject(output);
+            JSONObject result = jsonObject.getJSONObject("result");
+            String uvi = result.getString("uv");
+            String st4 = "0";
+
+            if(Integer.parseInt(uvi) != 0){
+                st4 = Integer.toString((200 * 5) / (3 * Integer.parseInt(uvi)))+ " mins";
+            }
+            else{
+                st4 = "No UV rays out there!";
+            }
+
+
+            //(200 * 5)⁄(3 * UVI)mins for skintype4
+
+            JSONObject suninfo = result.getJSONObject("sun_info").getJSONObject("sun_times");
+
+            //Log.i("uvte", suninfo.getString("goldenHourEnd")+ " "+ suninfo.getString("goldenHour")+" "+ suninfo.getString("solarNoon")+ " "+ st4);
+            //Log.i("uvteINFOTEST", result.getString("uv")+" "+ result.getString("uv_nax")+" "+result.getString("sun_info"));
+
+            uvtextview.setText("UV index: "+ uvi+"\n\nMaximum UV Today: "+result.getString("uv_max")+"\n\nSkinburn(time in minutes): "+st4+"\n\nSolar Noon: "+ suninfo.getString("solarNoon")+"\n\nGolden Hour: "+ suninfo.getString("goldenHour")+"\n\nGolden Hour End: "+ suninfo.getString("goldenHourEnd"));
+
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
