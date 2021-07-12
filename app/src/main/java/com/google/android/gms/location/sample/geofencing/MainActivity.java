@@ -171,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             String uvi = result.getString("uv");
             String st4 = "0";
 
-            if(Integer.parseInt(uvi) != 0){
-                st4 = Integer.toString((200 * 5) / (3 * Integer.parseInt(uvi)))+ " mins";
+            if(Float.parseFloat(uvi) != 0){
+                st4 = Float.toString((200 * 5) / (3 * Float.parseFloat(uvi)))+ " mins";
             }
             else{
                 st4 = "No UV rays out there!";
@@ -193,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e){
             e.printStackTrace();
         }
 
